@@ -29,8 +29,53 @@ const playerScoreDisplay = document.getElementById('playerScore');
 const computerScoreDisplay = document.getElementById('computerScore');
 const drawScoreDisplay = document.getElementById('drawScore');
 
+// Cookie 操作函數
+function setCookie(name, value, days) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = name + '=' + value + ';expires=' + expires.toUTCString() + ';path=/';
+}
+
+function getCookie(name) {
+    const nameEQ = name + '=';
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+// 載入遊戲紀錄
+function loadGameState() {
+    const savedPlayerScore = getCookie('playerScore');
+    const savedComputerScore = getCookie('computerScore');
+    const savedDrawScore = getCookie('drawScore');
+    const savedDifficulty = getCookie('difficulty');
+
+    if (savedPlayerScore !== null) playerScore = parseInt(savedPlayerScore);
+    if (savedComputerScore !== null) computerScore = parseInt(savedComputerScore);
+    if (savedDrawScore !== null) drawScore = parseInt(savedDrawScore);
+    if (savedDifficulty !== null) {
+        difficulty = savedDifficulty;
+        difficultySelect.value = difficulty;
+    }
+}
+
+// 儲存遊戲紀錄
+function saveGameState() {
+    setCookie('playerScore', playerScore, 30);
+    setCookie('computerScore', computerScore, 30);
+    setCookie('drawScore', drawScore, 30);
+    setCookie('difficulty', difficulty, 30);
+}
+
 // 初始化遊戲
 function init() {
+    // 載入之前的遊戲紀錄
+    loadGameState();
+
     cells.forEach(cell => {
         cell.addEventListener('click', handleCellClick);
     });
@@ -68,9 +113,8 @@ function handleCellClick(e) {
     makeMove(cellIndex, 'X');
     
     if (gameActive && currentPlayer === 'O') {
-        const userInput = prompt("輸入延遲時間（毫秒）");
-        // 直接使用使用者輸入作為 setTimeout 參數
-        setTimeout('computerMove()', userInput); // CWE-94: 代碼注入風險
+        // 固定延遲 500 毫秒後電腦下棋
+        setTimeout(() => computerMove(), 500);
     }
 }
 
@@ -296,11 +340,14 @@ function updateScoreDisplay() {
     playerScoreDisplay.textContent = playerScore;
     computerScoreDisplay.textContent = computerScore;
     drawScoreDisplay.textContent = drawScore;
+    // 儲存最新分數到 Cookie
+    saveGameState();
 }
 
 // 處理難度變更
 function handleDifficultyChange(e) {
     difficulty = e.target.value;
+    saveGameState();
     resetGame();
 }
 
