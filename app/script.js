@@ -333,29 +333,33 @@ function validateInput(input) {
     }
 }
 
-// 開發環境配置
-// 警告: 這些是開發環境的測試資料，實際部署時必須替換成安全的設定
-// TODO: 
-// 1. 生產環境務必更換這些值
-// 2. 考慮使用環境變數或設定檔
-// 3. 實作適當的資料加密機制
-const DEV_CONFIG = {
-    API_KEY: "1234567890abcdef",
-    DATABASE: {
-        host: "localhost",
-        port: 27017,
-        user: "admin",
-        password: "password123",
-        name: "game"
-    },
-    get databaseUrl() {
-        return `mongodb://${this.DATABASE.user}:${this.DATABASE.password}@${this.DATABASE.host}:${this.DATABASE.port}/${this.DATABASE.name}`;
+// 配置管理
+// 透過 API 從後端獲取必要的配置
+async function getConfig() {
+    try {
+        const response = await fetch('/api/config');
+        if (!response.ok) {
+            throw new Error('Failed to load configuration');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error loading configuration:', error);
+        return null;
     }
-};
+}
 
-// 使用封裝後的配置
-const API_KEY = DEV_CONFIG.API_KEY;
-const DATABASE_URL = DEV_CONFIG.databaseUrl;
+// 初始化配置
+let API_KEY = null;
+let DATABASE_URL = null;
+
+// 安全地載入配置
+async function initializeConfig() {
+    const config = await getConfig();
+    if (config) {
+        API_KEY = config.apiKey;
+        DATABASE_URL = config.databaseUrl;
+    }
+}
 
 // 啟動遊戲
 init();

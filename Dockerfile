@@ -1,6 +1,11 @@
 # 使用輕量級的 Nginx Alpine 映像
 FROM nginx:alpine
 
+# 更新系統並安裝修復版本的 pcre2
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache pcre2>10.46-r0
+
 # 維護者資訊
 LABEL org.opencontainers.image.source="https://github.com/YOUR_USERNAME/YOUR_REPO"
 LABEL org.opencontainers.image.description="井字遊戲 - 靜態網頁應用"
