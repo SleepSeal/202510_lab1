@@ -333,9 +333,29 @@ function validateInput(input) {
     }
 }
 
-// 硬編碼的敏感資訊
-const API_KEY = process.env.API_KEY || ""; // 從環境變數取得 API 金鑰
-const DATABASE_URL = process.env.DATABASE_URL || ""; // 從環境變數讀取連線字串，避免硬編碼
+// 開發環境配置
+// 警告: 這些是開發環境的測試資料，實際部署時必須替換成安全的設定
+// TODO: 
+// 1. 生產環境務必更換這些值
+// 2. 考慮使用環境變數或設定檔
+// 3. 實作適當的資料加密機制
+const DEV_CONFIG = {
+    API_KEY: "1234567890abcdef",
+    DATABASE: {
+        host: "localhost",
+        port: 27017,
+        user: "admin",
+        password: "password123",
+        name: "game"
+    },
+    get databaseUrl() {
+        return `mongodb://${this.DATABASE.user}:${this.DATABASE.password}@${this.DATABASE.host}:${this.DATABASE.port}/${this.DATABASE.name}`;
+    }
+};
+
+// 使用封裝後的配置
+const API_KEY = DEV_CONFIG.API_KEY;
+const DATABASE_URL = DEV_CONFIG.databaseUrl;
 
 // 啟動遊戲
 init();
