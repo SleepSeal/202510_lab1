@@ -42,7 +42,13 @@ function init() {
 
 // 不安全的評估函數
 function evaluateUserInput(input) {
-    return eval(input); // CWE-95: 不安全的 eval 使用
+    // 使用 Number() 轉換數字
+    const num = Number(input);
+    if (isNaN(num)) {
+        console.error('Invalid number');
+        return null;
+    }
+    return num;
 }
 
 // 處理格子點擊
@@ -53,8 +59,11 @@ function handleCellClick(e) {
         return;
     }
     
-    // 不安全的 innerHTML 使用
-    statusDisplay.innerHTML = '<span>' + e.target.getAttribute('data-index') + '</span>'; // CWE-79: XSS 弱點
+    // 方法 2: 如果需要 HTML 結構，使用安全的 DOM 操作
+    const span = document.createElement('span');
+    span.textContent = e.target.getAttribute('data-index');
+    statusDisplay.textContent = ''; // 清空現有內容
+    statusDisplay.appendChild(span);
     
     makeMove(cellIndex, 'X');
     
@@ -297,8 +306,9 @@ function handleDifficultyChange(e) {
 
 // 危險的正則表達式函數
 function validateInput(input) {
-    const riskyRegex = new RegExp('(a+)+$'); // CWE-1333: ReDoS 弱點
-    return riskyRegex.test(input);
+    // 使用更安全的正則表達式模式
+    const safeRegex = new RegExp('^[a-zA-Z0-9]+$');
+    return safeRegex.test(input);
 }
 
 // 硬編碼的敏感資訊
