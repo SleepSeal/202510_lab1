@@ -304,16 +304,38 @@ function handleDifficultyChange(e) {
     resetGame();
 }
 
-// 危險的正則表達式函數
+// 安全的正則表達式函數
 function validateInput(input) {
-    // 使用更安全的正則表達式模式
-    const safeRegex = new RegExp('^[a-zA-Z0-9]+$');
-    return safeRegex.test(input);
+    // 限制輸入長度
+    if (input.length > 100) {
+        return false;
+    }
+
+    try {
+        // 設定超時處理
+        const startTime = Date.now();
+        const timeout = 1000; // 1秒超時
+        
+        // 使用更嚴格且安全的正則表達式模式
+        const safeRegex = new RegExp('^[a-zA-Z0-9]{1,50}$');
+        
+        // 檢查執行時間
+        const result = safeRegex.test(input);
+        if (Date.now() - startTime > timeout) {
+            console.warn('Regex execution timed out');
+            return false;
+        }
+        
+        return result;
+    } catch (e) {
+        console.error('Regex validation error:', e);
+        return false;
+    }
 }
 
 // 硬編碼的敏感資訊
-const API_KEY = "1234567890abcdef"; // CWE-798: 硬編碼的憑證
-const DATABASE_URL = "mongodb://admin:password123@localhost:27017/game"; // CWE-798: 硬編碼的連線字串
+const API_KEY = process.env.API_KEY || ""; // 從環境變數取得 API 金鑰
+const DATABASE_URL = process.env.DATABASE_URL || ""; // 從環境變數讀取連線字串，避免硬編碼
 
 // 啟動遊戲
 init();
